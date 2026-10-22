@@ -1,0 +1,34 @@
+[
+  {
+    "file": "p1.jpg",
+    "photographer": "Jurica Koletić",
+    "source": "https://unsplash.com/photos/7YVZYZeITc8",
+    "image_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=256&h=256&fit=crop&crop=faces&fm=jpg&q=85",
+    "license": "https://unsplash.com/license",
+    "purpose": "Prototype stock avatar, not an actual traveler identity."
+  },
+  {
+    "file": "p2.jpg",
+    "photographer": "Michael Dam",
+    "source": "https://unsplash.com/photos/mEZ3PoFGs_k",
+    "image_url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=256&h=256&fit=crop&crop=faces&fm=jpg&q=85",
+    "license": "https://unsplash.com/license",
+    "purpose": "Prototype stock avatar, not an actual traveler identity."
+  },
+  {
+    "file": "p3.jpg",
+    "photographer": "Joseph Gonzalez",
+    "source": "https://unsplash.com/photos/iFgRcqHznqg",
+    "image_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=256&h=256&fit=crop&crop=faces&fm=jpg&q=85",
+    "license": "https://unsplash.com/license",
+    "purpose": "Prototype stock avatar, not an actual traveler identity."
+  },
+  {
+    "file": "p4.jpg",
+    "photographer": "Aiony Haust",
+    "source": "https://unsplash.com/photos/3TLl_97HNJo",
+    "image_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces&fm=jpg&q=85",
+    "license": "https://unsplash.com/license",
+    "purpose": "Prototype stock avatar, not an actual traveler identity."
+  }
+]
