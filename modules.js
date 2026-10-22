@@ -93,8 +93,8 @@ function surveyAttachment(){return {kind:'survey',name:'意見調查表',title:'
 function renderSurveyCard(a){
   return `<article class="survey-card"><div class="survey-card-heading">${icon('file')}<h3>${esc(a.title)}</h3></div><p>${nl(a.description)}</p><a class="survey-card-cta" href="${surveyUrl}" target="_blank" rel="noopener noreferrer">填寫意見調查表</a></article>`;
 }
-function messagePlainText(m){return [m.text,...(m.attachments||[]).filter(a=>['itinerary','traveler','survey'].includes(a.kind)).map(a=>a.kind==='survey'?[a.title,a.description,surveyUrl].join('\n'):a.kind==='traveler'?travelerCardText(a):itineraryText(a))].filter(Boolean).join('\n\n');}
-function messageSummary(m){return m?.text||m?.attachments?.find(a=>['itinerary','traveler','survey'].includes(a.kind))?.name||(m?.attachments?.length?'[附件訊息]':'開始這段旅途的對話');}
+function messagePlainText(m){if(m?.recalled)return '訊息已收回';return [m.text,...(m.attachments||[]).filter(a=>['itinerary','traveler','survey'].includes(a.kind)).map(a=>a.kind==='survey'?[a.title,a.description,surveyUrl].join('\n'):a.kind==='traveler'?travelerCardText(a):itineraryText(a))].filter(Boolean).join('\n\n');}
+function messageSummary(m){if(m?.recalled)return '訊息已收回';return m?.text||m?.attachments?.find(a=>['itinerary','traveler','survey'].includes(a.kind))?.name||(m?.attachments?.length?'[附件訊息]':'開始這段旅途的對話');}
 function renderItineraryCard(a){
   return `<article class="itinerary-card"><header><div class="flex">${icon('calendar')}<span>每日行程概覽</span></div><strong>${esc(a.date)}</strong>${a.title?`<p class="itinerary-route">第 ${esc(a.day)} 天 · ${esc(a.title)}</p>`:''}<small>${a.items.length} 項安排</small></header><div class="itinerary-timeline">${a.items.map((r,i)=>`<div class="itinerary-stop ${r.type==='景點'?'spot':'meal'}"><span class="stop-marker">${r.type==='景點'?'':icon('check')}</span><div class="stop-body"><div class="between"><span class="stop-type">${esc(r.type)}</span>${r.time?`<time>${esc(r.time)}</time>`:''}</div><h4>${esc(r.title)}</h4>${r.note?`<p>${nl(r.note)}</p>`:''}</div></div>`).join('')}</div>${a.note?`<footer><strong>小提醒</strong><p>${nl(a.note)}</p></footer>`:''}</article>`;
 }
@@ -129,6 +129,9 @@ function drawModuleModal(x,c){
 function handleModuleAction(action,el){
   const pid=el.dataset.id,index=Number(el.dataset.index);
   switch(action){
+    case 'recall':{const m=getMsg(pid);if(!m||m.sender!=='me'||m.recalled||m.status!=='sent')return true;closeMessageActions();openModal('recall-confirm',{mid:pid});return true;}
+    case 'recall-confirm':{const m=getMsg(pid);if(!m||m.sender!=='me'||m.recalled||m.status!=='sent')return true;if(state.offline){toast('目前離線，請連線後再收回。');return true;}m.recalled=true;m.recalledAt=new Date().toISOString();m.text='';m.attachments=[];m.reply=null;m.confirm=false;m.read=[];m.confirmed=[];ui.translated.delete(pid);save();closeModal();render();toast('已收回訊息');return true;}
+
     case 'survey-new':{
       if(current().kind==='internal')return true;
       ui.plus=false;render();openModal('survey-preview',{card:surveyAttachment(),chatId:ui.chat});return true;
@@ -208,9 +211,9 @@ function messageAuthor(m,p,own){return !own&&p&&!p.role?btn('profile',esc(p.name
 function closeMessageActions(){document.querySelector('#message-actions')?.remove();document.querySelector('.press-selected')?.classList.remove('press-selected');}
 function showMessageActions(mid){
   closeMessageActions();
-  const message=getMsg(mid),bubble=document.querySelector(`[data-message="${mid}"] .bubble`);if(!message||!bubble)return;
+  const message=getMsg(mid),bubble=document.querySelector(`[data-message="${mid}"] .bubble`);if(!message||!bubble||message.recalled)return;
   const internal=state.chats.find(c=>c.id===message.chat)?.kind==='internal';
-  const actions=[['copy','file','複製'],['reply','chat','回覆'],...(message.text.trim()?[['translate','translate',ui.translated.has(mid)?'收起翻譯':'翻譯']]:[]),...(!internal?[['forward','forward','轉發']]:[]),...(message.sender==='me'&&message.status!=='failed'?[['receipts','info','訊息資訊']]:[])];
+  const actions=[['copy','file','複製'],['reply','chat','回覆'],...(message.text.trim()?[['translate','translate',ui.translated.has(mid)?'收起翻譯':'翻譯']]:[]),...(!internal?[['forward','forward','轉發']]:[]),...(message.sender==='me'&&message.status!=='failed'?[['receipts','info','訊息資訊'],['recall','back','收回訊息']]:[])];
   const layer=document.createElement('div');layer.id='message-actions';
   layer.innerHTML=`<button class="message-action-shade" data-action="close-message-actions" aria-label="關閉訊息操作"></button><section class="message-action-grid" role="menu" aria-label="訊息操作" style="--action-columns:${Math.min(actions.length,5)}">${actions.map(([action,glyph,label])=>btn(action,icon(glyph)+`<span>${label}</span>`,'message-action',`data-id="${mid}" role="menuitem"`)).join('')}</section>`;
   document.body.append(layer);bubble.classList.add('press-selected');
